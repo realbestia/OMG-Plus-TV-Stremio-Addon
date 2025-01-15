@@ -50,7 +50,7 @@ async function generateConfig() {
                 version: '1.0.0',
                 name: 'OMG M3U Addon',
                 description: 'Un add-on per Stremio che carica una playlist di canali M3U con EPG.',
-                logo: 'https://github.com/mccoy88f/Stremio-IPTVm3u/blob/main/tv.png?raw=true',
+                logo: 'https://github.com/mccoy88f/OMG-M3U-Addon/blob/main/tv.png?raw=true',
                 resources: ['stream', 'catalog', 'meta'],
                 types: ['tv'],
                 idPrefixes: ['tv'],
