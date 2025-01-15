@@ -111,9 +111,14 @@ class EPGManager {
         }
 
         // Ordina i programmi per ogni canale
-        for (const programs of this.programGuide.values()) {
-            programs.sort((a, b) => a.start - b.start);
+        for (const [channelId, programs] of this.programGuide.entries()) {
+            this.programGuide.set(
+                channelId, 
+                programs.sort((a, b) => a.start - b.start)
+            );
         }
+
+        console.log('Primi 5 canali con EPG:', Array.from(this.programGuide.keys()).slice(0, 5));
 
         this.lastUpdate = Date.now();
         this.isUpdating = false;
@@ -123,7 +128,6 @@ class EPGManager {
     getCurrentProgram(channelId) {
         const channel = this.programGuide.get(channelId);
         if (!channel) {
-            // console.log(`Nessun dato EPG per il canale: ${channelId}`);
             return null;
         }
 
@@ -132,18 +136,12 @@ class EPGManager {
             program.start <= now && program.stop >= now
         );
 
-        if (!currentProgram) {
-            // console.log(`Nessun programma corrente per il canale: ${channelId}`);
-            return null;
-        }
-
         return currentProgram;
     }
 
     getUpcomingPrograms(channelId, limit = 5) {
         const channel = this.programGuide.get(channelId);
         if (!channel) {
-            // console.log(`Nessun dato EPG per il canale: ${channelId}`);
             return [];
         }
 
