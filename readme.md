@@ -1,4 +1,4 @@
-# Stremio IPTV Add-on
+# Stremio M3U Add-on
 
 Un add-on per Stremio che carica una playlist M3U di IPTV Italia con supporto EPG e visualizzazione dettagliata dei programmi.
 
