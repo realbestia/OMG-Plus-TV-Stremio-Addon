@@ -1,6 +1,6 @@
-# Stremio M3U Add-on
+# OMG M3U Addon
 
-Un add-on per Stremio che carica una playlist M3U di IPTV Italia con supporto EPG e visualizzazione dettagliata dei programmi.
+Un add-on per Stremio che carica una playlist di canali M3U con supporto EPG e visualizzazione dettagliata dei programmi.
 
 ## Funzionalità
 
