@@ -203,7 +203,7 @@ async function startAddon() {
 
         // Inizializza l'EPG dopo l'avvio del server se è abilitata
         if (config.enableEPG) {
-            console.log('Inizializzazione EPG pianificata tra 5 minuti...');
+            console.log('Inizializzazione EPG pianificata tra 1 minuto...');
             await EPGManager.initializeEPG(config.EPG_URL);
         } else {
             console.log('EPG disabilitata, skip inizializzazione');
