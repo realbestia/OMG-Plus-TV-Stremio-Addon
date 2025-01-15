@@ -181,13 +181,6 @@ async function startAddon() {
     <button onclick="window.location = 'stremio://${landing.transportUrl}/manifest.json'">
         Aggiungi a Stremio
     </button>
-    <button onclick="copyManifestLink()">
-        Copia link manifest
-    </button>
-    <div class="footer">
-        Questo server è basato sul progetto di McCoy88f<br>
-        <a href="https://github.com/mccoy88f/OMG-M3U-Addon/" target="_blank">Link al repository</a>
-    </div>
 </body>
 </html>`;
 
@@ -203,7 +196,7 @@ async function startAddon() {
 
         // Inizializza l'EPG dopo l'avvio del server se è abilitata
         if (config.enableEPG) {
-            console.log('Inizializzazione EPG pianificata tra 5 minuti...');
+            console.log('Inizializzazione EPG pianificata tra 1 minuto...');
             await EPGManager.initializeEPG(config.EPG_URL);
         } else {
             console.log('EPG disabilitata, skip inizializzazione');
