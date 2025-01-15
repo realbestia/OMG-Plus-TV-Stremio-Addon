@@ -143,8 +143,9 @@ class EPGManager {
 
             if (matchingIds.length > 0) {
                 const now = new Date();
-                const currentProgram = programs.find(program => 
-                    program.start <= now && program.stop >= now
+                const nowUTC = new Date(now.toISOString()); // Converti in UTC
+                const currentProgram = programmes.find(program => 
+                    program.start <= nowUTC && program.stop >= nowUTC
                 );
 
                 if (currentProgram) {
