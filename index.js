@@ -46,11 +46,11 @@ async function generateConfig() {
             },
             
             manifest: {
-                id: 'org.mccoy88f.OMGM3UAddon',
-                version: '1.3.0',
+                id: 'org.mccoy88f.iptvaddon',
+                version: '1.0.0',
                 name: 'OMG M3U Addon',
-                description: 'Un add-on per Stremio che carica una playlist di canali in formato M3U con EPG.',
-                logo: 'https://github.com/mccoy88f/Stremio-M3U-Addon/blob/main/tv.png?raw=true',
+                description: 'Un add-on per Stremio che carica una playlist di canali M3U con EPG.',
+                logo: 'https://github.com/mccoy88f/OMG-M3U-Addon/blob/main/tv.png?raw=true',
                 resources: ['stream', 'catalog', 'meta'],
                 types: ['tv'],
                 idPrefixes: ['tv'],
@@ -116,6 +116,73 @@ async function startAddon() {
             console.error('Error updating cache on startup:', error);
         });
 
+        // Personalizza la pagina HTML
+        const landingTemplate = landing => `
+<!DOCTYPE html>
+<html style="background: #000">
+<head>
+    <meta charset="utf-8">
+    <title>${landing.name} - Stremio Addon</title>
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        h1 { color: #fff; }
+        .logo {
+            width: 150px;
+            margin: 0 auto;
+            display: block;
+        }
+        button {
+            border: 0;
+            outline: 0;
+            color: #fff;
+            background: #8A5AAB;
+            padding: 13px 30px;
+            margin: 20px 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #9B6BC3;
+        }
+        .footer {
+            margin-top: 50px;
+            font-size: 14px;
+            color: #666;
+        }
+        .footer a {
+            color: #8A5AAB;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+    <script>
+        function copyManifestLink() {
+            const manifestUrl = window.location.href + 'manifest.json';
+            navigator.clipboard.writeText(manifestUrl).then(() => {
+                alert('Link del manifest copiato negli appunti!');
+            });
+        }
+    </script>
+</head>
+<body>
+    <img class="logo" src="${landing.logo}" />
+    <h1 style="color: white">${landing.name}</h1>
+    <h2 style="color: white">${landing.description}</h2>
+    <button onclick="window.location = 'stremio://${landing.transportUrl}/manifest.json'">
+        Aggiungi a Stremio
+    </button>
+</body>
+</html>`;
 
         // Create and start the server
         const addonInterface = builder.getInterface();
