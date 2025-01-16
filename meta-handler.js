@@ -15,7 +15,7 @@ function enrichWithDetailedEPG(meta, channelId) {
         // Crea la descrizione base
         let description = [];
         
-        // Aggiungi le informazioni del programma corrente
+        // Programma corrente
         description.push('📺 IN ONDA ORA:', currentProgram.title);
         
         if (currentProgram.description) {
@@ -25,19 +25,22 @@ function enrichWithDetailedEPG(meta, channelId) {
         description.push('', `⏰ ${currentProgram.start} - ${currentProgram.stop}`);
 
         if (currentProgram.category) {
-            description.push('', `🏷️ ${currentProgram.category}`);
+            description.push(`🏷️ ${currentProgram.category}`);
         }
 
-        // Aggiungi i programmi futuri
+        // Prossimi programmi
         if (upcomingPrograms?.length > 0) {
             description.push('', '📅 PROSSIMI PROGRAMMI:');
             upcomingPrograms.forEach(program => {
-                description.push(`• ${program.start} - ${program.title}`);
+                description.push(
+                    '',
+                    `• ${program.start} - ${program.title}`
+                );
                 if (program.description) {
-                    const shortDesc = program.description.length > 100 
-                        ? program.description.substring(0, 97) + '...'
-                        : program.description;
-                    description.push(`  ${shortDesc}`);
+                    description.push(`  ${program.description}`);
+                }
+                if (program.category) {
+                    description.push(`  🏷️ ${program.category}`);
                 }
             });
         }
@@ -57,16 +60,13 @@ function enrichWithDetailedEPG(meta, channelId) {
  */
 async function metaHandler({ type, id }) {
     try {
-        // Aggiorna la cache se necessario
         if (CacheManager.isStale()) {
             await CacheManager.updateCache();
         }
 
-        // Estrai l'ID del canale
         const channelId = id.split('|')[1];
-
-        // Trova il canale
         const allChannels = CacheManager.getCachedData().channels;
+        
         const channel = allChannels.find(ch => 
             ch.id === id || 
             ch.streamInfo?.tvg?.id === channelId ||
@@ -77,7 +77,7 @@ async function metaHandler({ type, id }) {
             return { meta: null };
         }
 
-        // Prepara le informazioni di base del canale
+        // Prepara le informazioni base del canale
         const meta = {
             id: channel.id,
             type: 'tv',
@@ -103,7 +103,6 @@ async function metaHandler({ type, id }) {
         // Prepara la descrizione base
         let baseDescription = [];
         
-        // Aggiungi informazioni tecniche
         if (channel.streamInfo?.tvg?.chno) {
             baseDescription.push(`📺 Canale ${channel.streamInfo.tvg.chno}`);
         }
