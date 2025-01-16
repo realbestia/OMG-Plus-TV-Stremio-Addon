@@ -120,8 +120,7 @@ class EPGManager {
             );
         }
 
-        console.log('Primi 5 canali con EPG:', Array.from(this.programGuide.keys()).slice(0, 5));
-
+        console.log('Canali EPG caricati:', Array.from(this.programGuide.keys()).slice(0, 5));
         this.lastUpdate = Date.now();
         this.isUpdating = false;
         console.log('Aggiornamento EPG completato con successo');
@@ -140,7 +139,12 @@ class EPGManager {
             const similarity = {
                 id: id,
                 matchType: null,
-                sample: programs[0]?.title  // Mostra un esempio di programma
+                programCount: programs.length,
+                sample: programs[0] ? {
+                    title: programs[0].title,
+                    start: programs[0].start,
+                    stop: programs[0].stop
+                } : 'Nessun programma'
             };
 
             if (idLower.includes(searchTerm) || searchTerm.includes(idLower)) {
@@ -155,14 +159,20 @@ class EPGManager {
         // Logga le corrispondenze simili trovate
         if (similarMatches.length > 0) {
             console.log('[EPG] Trovate corrispondenze simili:', 
-                similarMatches.map(m => `\n- ID: "${m.id}" (${m.matchType}) - Esempio programma: ${m.sample}`).join('')
+                similarMatches.map(m => 
+                    `\n- ID: "${m.id}" (${m.matchType})`
+                    + `\n  Programmi totali: ${m.programCount}`
+                    + `\n  Esempio: ${typeof m.sample === 'string' ? m.sample : JSON.stringify(m.sample)}`
+                ).join('')
             );
         }
 
-        // Usa solo corrispondenza esatta per i dati effettivi
+        // Debug info sulla ricerca esatta
         const programs = this.programGuide.get(channelId);
+        console.log(`[EPG] Dati per match esatto "${channelId}":`,
+            programs ? `${programs.length} programmi trovati` : 'Nessun programma');
         
-        if (!programs) {
+        if (!programs || programs.length === 0) {
             console.log('[EPG] Nessun programma trovato per ID esatto:', channelId);
             return null;
         }
@@ -175,21 +185,24 @@ class EPGManager {
         );
 
         if (currentProgram) {
-            console.log('[EPG] Programma corrente trovato:', currentProgram);
+            console.log('[EPG] Programma corrente trovato:', JSON.stringify(currentProgram, null, 2));
             return currentProgram;
         }
 
-        console.log('[EPG] Nessun programma corrente per ID:', channelId);
+        console.log('[EPG] Nessun programma corrente per ID:', channelId, 
+            '(Primo programma disponibile:', JSON.stringify(programs[0], null, 2), ')');
         return null;
     }
 
     getUpcomingPrograms(channelId, limit = 5) {
         console.log('[EPG] Ricerca programmi futuri per ID:', channelId);
         
-        // Verifica se abbiamo programmi per questo ID esatto
+        // Debug info sulla ricerca esatta
         const programs = this.programGuide.get(channelId);
+        console.log(`[EPG] Dati per match esatto "${channelId}":`,
+            programs ? `${programs.length} programmi trovati` : 'Nessun programma');
         
-        if (!programs) {
+        if (!programs || programs.length === 0) {
             console.log('[EPG] Nessun programma trovato per ID:', channelId);
             return [];
         }
@@ -201,7 +214,7 @@ class EPGManager {
             .slice(0, limit);
 
         if (upcomingPrograms.length > 0) {
-            console.log('[EPG] Programmi futuri trovati:', upcomingPrograms);
+            console.log('[EPG] Programmi futuri trovati:', JSON.stringify(upcomingPrograms, null, 2));
             return upcomingPrograms;
         }
 
