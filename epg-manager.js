@@ -144,13 +144,17 @@ class EPGManager {
             if (matchingIds.length > 0) {
                 const now = new Date();
                 const nowUTC = new Date(now.toISOString()); // Converti in UTC
-                const currentProgram = programmes.find(program => 
-                    program.start <= nowUTC && program.stop >= nowUTC
-                );
+                const programs = this.programGuide.get(storedId);
+                
+                if (programs && programs.length > 0) {
+                    const currentProgram = programs.find(program => 
+                        program.start <= nowUTC && program.stop >= nowUTC
+                    );
 
-                if (currentProgram) {
-                    console.log('[EPG] Programma corrente trovato:', currentProgram);
-                    return currentProgram;
+                    if (currentProgram) {
+                        console.log('[EPG] Programma corrente trovato:', currentProgram);
+                        return currentProgram;
+                    }
                 }
             }
         }
@@ -176,7 +180,7 @@ class EPGManager {
                 storedId.toLowerCase().includes(id.toLowerCase())
             );
 
-            if (matchingIds.length > 0) {
+            if (matchingIds.length > 0 && programs && programs.length > 0) {
                 const now = new Date();
                 const upcomingPrograms = programs
                     .filter(program => program.start >= now)
