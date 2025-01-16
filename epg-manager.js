@@ -19,20 +19,33 @@ class EPGManager {
     parseEPGDate(dateString) {
         if (!dateString) return null;
         try {
-            // Formato: "20250113193000 +0200"
-            const year = dateString.substring(0, 4);
-            const month = dateString.substring(4, 6);
-            const day = dateString.substring(6, 8);
-            const hour = dateString.substring(8, 10);
-            const minute = dateString.substring(10, 12);
-            const second = dateString.substring(12, 14);
-            const timezone = dateString.substring(15);
-
+            // Formato base: "20250117063000 +0000"
+            const regex = /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})\s*([+-]\d{4})$/;
+            const match = dateString.match(regex);
+            
+            if (!match) {
+                console.log(`[EPG] Formato data non valido: ${dateString}`);
+                return null;
+            }
+            
+            const [_, year, month, day, hour, minute, second, timezone] = match;
+            
             // Costruisci la data in formato ISO
-            const isoString = `${year}-${month}-${day}T${hour}:${minute}:${second}${timezone.replace('', ':').substring(0,3)}:${timezone.substring(3)}`;
-            return new Date(isoString);
+            const tzHours = timezone.substring(0, 3);
+            const tzMinutes = timezone.substring(3);
+            const isoString = `${year}-${month}-${day}T${hour}:${minute}:${second}${tzHours}:${tzMinutes}`;
+            
+            const date = new Date(isoString);
+            
+            // Verifica validità
+            if (isNaN(date.getTime())) {
+                console.log(`[EPG] Data risultante non valida: ${isoString}`);
+                return null;
+            }
+            
+            return date;
         } catch (error) {
-            console.log(`[EPG] Errore parsing data: ${dateString}`, error.message);
+            console.log(`[EPG] Errore nel parsing della data: ${dateString}`, error.message);
             return null;
         }
     }
