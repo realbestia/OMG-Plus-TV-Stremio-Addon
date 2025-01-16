@@ -106,6 +106,14 @@ class EPGManager {
         console.log(`Inizio processamento EPG: ${programmes.length} programmi totali`);
         console.log(`Processamento in ${totalChunks} chunks di ${this.CHUNK_SIZE} programmi`);
 
+        // Log dei primi programmi per debug
+        console.log('=== Debug primi 2 programmi dall\'EPG ===');
+        console.log(JSON.stringify(programmes.slice(0, 2), null, 2));
+        console.log('=====================================');
+
+        // Traccia canali e conteggi
+        const channelCounts = new Map();
+
         for (let i = 0; i < programmes.length; i += this.CHUNK_SIZE) {
             const chunk = programmes.slice(i, i + this.CHUNK_SIZE);
             const chunkNumber = Math.floor(i / this.CHUNK_SIZE) + 1;
@@ -116,6 +124,7 @@ class EPGManager {
                 const channelId = programme.$.channel;
                 if (!this.programGuide.has(channelId)) {
                     this.programGuide.set(channelId, []);
+                    channelCounts.set(channelId, 0);
                 }
 
                 const programData = {
@@ -138,6 +147,7 @@ class EPGManager {
                 // Verifica che le date siano valide prima di aggiungere il programma
                 if (programData.start && programData.stop && !isNaN(programData.start) && !isNaN(programData.stop)) {
                     this.programGuide.get(channelId).push(programData);
+                    channelCounts.set(channelId, channelCounts.get(channelId) + 1);
                 }
             }
 
@@ -154,7 +164,15 @@ class EPGManager {
             );
         }
 
-        console.log('Canali EPG caricati:', Array.from(this.programGuide.keys()).slice(0, 5));
+        // Log riepilogativo
+        console.log('\n=== Riepilogo Canali EPG ===');
+        console.log('Totale canali trovati:', channelCounts.size);
+        console.log('Dettaglio programmi per canale:');
+        for (const [channel, count] of channelCounts.entries()) {
+            console.log(`- ${channel}: ${count} programmi`);
+        }
+        console.log('===========================\n');
+
         this.lastUpdate = Date.now();
         this.isUpdating = false;
         console.log('Aggiornamento EPG completato con successo');
