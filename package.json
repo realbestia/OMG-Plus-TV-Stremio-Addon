@@ -1,7 +1,7 @@
 {
-  "name": "omg-tv-stremio-addon",
+  "name": "omg-plus-tv-stremio-addon",
   "version": "1.0.0",
-  "description": "Un add-on per Stremio che carica una playlist di canali M3U con EPG.",
+  "description": "Un add-on per Stremio che carica una playlist personalizzata di canali M3U con EPG.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"

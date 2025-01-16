@@ -31,10 +31,10 @@ const config = {
     
     // Manifest configuration
     manifest: {
-        id: 'org.mccoy88f.omgtv',
-        version: '1.2.0',
-        name: 'OMG TV',
-        description: 'Un add-on per Stremio che carica una playlist di canali in formato M3U con EPG.',
+        id: 'org.mccoy88f.omgplustv',
+        version: '1.5.0',
+        name: 'OMG+ TV',
+        description: 'Un add-on per Stremio che carica una playlist personalizzata di canali in formato M3U con EPG.',
         logo: 'https://github.com/mccoy88f/OMG-TV-Stremio-Addon/blob/main/tv.png?raw=true',
         resources: ['stream', 'catalog', 'meta'],
         types: ['tv'],
@@ -42,8 +42,8 @@ const config = {
         catalogs: [
             {
                 type: 'tv',
-                id: 'omg_tv',
-                name: 'OMG TV',
+                id: 'omg_plus_tv',
+                name: 'OMG+ TV',
                 extra: [
                     {
                         name: 'genre',
