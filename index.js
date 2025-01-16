@@ -46,7 +46,7 @@ async function generateConfig() {
             },
             
             manifest: {
-                id: 'org.mccoy88f.iptvaddon',
+                id: 'org.mccoy88f.omgtv',
                 version: '1.0.0',
                 name: 'OMG M3U Addon',
                 description: 'Un add-on per Stremio che carica una playlist di canali M3U con EPG.',
@@ -57,8 +57,8 @@ async function generateConfig() {
                 catalogs: [
                     {
                         type: 'tv',
-                        id: 'iptv_category',
-                        name: 'IPTV Italia',
+                        id: 'omgtv_category',
+                        name: 'OMG TV',
                         extra: [
                             {
                                 name: 'genre',
