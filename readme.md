@@ -137,6 +137,10 @@ epgSettings: {
 
 ## 🔄 Changelog
 
+v1.5.0
+🔒 Aggiunta la possibilità di mostare sollo i flussi tramite proxy
+🚀 Migliorata stabilità e semplicità di configurazione
+
 ### v1.2.0
 - ✨ Aggiunta vista dettagliata dei canali
 - 📊 Migliorata integrazione EPG con programmazione dettagliata
