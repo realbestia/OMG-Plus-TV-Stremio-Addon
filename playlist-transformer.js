@@ -141,7 +141,6 @@ class PlaylistTransformer {
 
         console.log(`[PlaylistTransformer] ✓ Canali processati: ${result.channels.length}`);
         console.log(`[PlaylistTransformer] ✓ Generi trovati: ${result.genres.length}`);
-        console.log('[PlaylistTransformer] Lista generi:', result.genres);
         console.log('=== Fine Parsing Playlist M3U ===\n');
 
         return result;

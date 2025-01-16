@@ -46,19 +46,19 @@ async function generateConfig() {
             },
             
             manifest: {
-                id: 'org.mccoy88f.iptvaddon',
-                version: '1.0.0',
-                name: 'OMG M3U Addon',
-                description: 'Un add-on per Stremio che carica una playlist di canali M3U con EPG.',
-                logo: 'https://github.com/mccoy88f/OMG-M3U-Addon/blob/main/tv.png?raw=true',
+                id: 'org.mccoy88f.omgplustv',
+                version: '1.5.0',
+                name: 'OMG+ TV Stremio Addon',
+                description: 'Un add-on per Stremio che carica una playlist personalizzata di canali M3U con EPG.',
+                logo: 'https://github.com/mccoy88f/OMG-TV-Stremio-Addon/blob/main/tv.png?raw=true',
                 resources: ['stream', 'catalog', 'meta'],
                 types: ['tv'],
                 idPrefixes: ['tv'],
                 catalogs: [
                     {
                         type: 'tv',
-                        id: 'iptv_category',
-                        name: 'IPTV Italia',
+                        id: 'omg_plus_tv_category',
+                        name: 'OMG+ TV',
                         extra: [
                             {
                                 name: 'genre',
@@ -196,7 +196,7 @@ async function startAddon() {
 
         // Inizializza l'EPG dopo l'avvio del server se è abilitata
         if (config.enableEPG) {
-            console.log('Inizializzazione EPG pianificata tra 1 minuto...');
+            
             await EPGManager.initializeEPG(config.EPG_URL);
         } else {
             console.log('EPG disabilitata, skip inizializzazione');

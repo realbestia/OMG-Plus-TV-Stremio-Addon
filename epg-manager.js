@@ -12,80 +12,103 @@ class EPGManager {
         this.lastUpdate = null;
         this.isUpdating = false;
         this.CHUNK_SIZE = 10000;
-        this.CHUNK_DELAY = 60000; // 1 minuto
+        this.validateAndSetTimezone();
+    }
+
+    validateAndSetTimezone() {
+        const tzRegex = /^[+-]\d{1,2}:\d{2}$/;
+        const timeZone = process.env.TIMEZONE_OFFSET || '+1:00';
+        
+        if (!tzRegex.test(timeZone)) {
+            this.timeZoneOffset = '+1:00';
+            return;
+        }
+        
+        this.timeZoneOffset = timeZone;
+        const [hours, minutes] = this.timeZoneOffset.substring(1).split(':');
+        this.offsetMinutes = (parseInt(hours) * 60 + parseInt(minutes)) * 
+                           (this.timeZoneOffset.startsWith('+') ? 1 : -1);
+    }
+
+    formatDateIT(date) {
+        if (!date) return '';
+        const localDate = new Date(date.getTime() + (this.offsetMinutes * 60000));
+        return localDate.toLocaleString('it-IT', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        }).replace(/\./g, ':');
+    }
+
+    parseEPGDate(dateString) {
+        if (!dateString) return null;
+        try {
+            const regex = /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})\s*([+-]\d{4})$/;
+            const match = dateString.match(regex);
+            
+            if (!match) return null;
+            
+            const [_, year, month, day, hour, minute, second, timezone] = match;
+            const tzHours = timezone.substring(0, 3);
+            const tzMinutes = timezone.substring(3);
+            const isoString = `${year}-${month}-${day}T${hour}:${minute}:${second}${tzHours}:${tzMinutes}`;
+            
+            const date = new Date(isoString);
+            return isNaN(date.getTime()) ? null : date;
+        } catch (error) {
+            return null;
+        }
     }
 
     async initializeEPG(url) {
-        console.log('Inizializzazione EPG pianificata...');
-        
-        // Pianifica l'aggiornamento alle 3 del mattino
-        cron.schedule('0 3 * * *', () => {
-            console.log('Avvio aggiornamento EPG pianificato');
-            this.startEPGUpdate(url);
-        });
-
-        // Avvia il primo aggiornamento dopo 1 minuto dall'avvio
-        setTimeout(() => {
-            this.startEPGUpdate(url);
-        }, 60 * 1000);
+        if (!this.programGuide.size) {
+            await this.startEPGUpdate(url);
+        }
+        cron.schedule('0 3 * * *', () => this.startEPGUpdate(url));
     }
 
     async startEPGUpdate(url) {
-        if (this.isUpdating) {
-            console.log('Aggiornamento EPG già in corso, skip...');
-            return;
-        }
+        if (this.isUpdating) return;
+        console.log('\n=== Inizio Aggiornamento EPG ===');
+        const startTime = Date.now();
+
 
         try {
             this.isUpdating = true;
             console.log('Scaricamento EPG da:', url);
-            
+
             const response = await axios.get(url, { responseType: 'arraybuffer' });
             let xmlString;
 
-            // Prova a decomprimere come gzip
             try {
                 const decompressed = await gunzip(response.data);
                 xmlString = decompressed.toString();
-            } catch (gzipError) {
-                // Se fallisce, assume che sia già un XML non compresso
-                console.log('File non compresso in gzip, processamento diretto...');
+            } catch {
                 xmlString = response.data.toString();
             }
 
-            // Parsa l'XML
             const xmlData = await parseStringPromise(xmlString);
-            
-            // Reset della guida programmi
             this.programGuide.clear();
-            
-            // Avvia il processamento progressivo
             await this.processEPGInChunks(xmlData);
+            const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+            console.log(`\n✓ Aggiornamento EPG completato in ${duration} secondi`);
+            console.log('=== Fine Aggiornamento EPG ===\n');
+
             
         } catch (error) {
-            console.error('Errore nell\'aggiornamento EPG:', error);
+            console.error('Errore EPG:', error.message);
+        } finally {
             this.isUpdating = false;
         }
     }
 
     async processEPGInChunks(data) {
-        if (!data.tv || !data.tv.programme) {
-            console.log('Nessun dato EPG trovato');
-            this.isUpdating = false;
-            return;
-        }
+        if (!data.tv || !data.tv.programme) return;
 
         const programmes = data.tv.programme;
-        const totalChunks = Math.ceil(programmes.length / this.CHUNK_SIZE);
         
-        console.log(`Inizio processamento EPG: ${programmes.length} programmi totali`);
-        console.log(`Processamento in ${totalChunks} chunks di ${this.CHUNK_SIZE} programmi`);
-
         for (let i = 0; i < programmes.length; i += this.CHUNK_SIZE) {
             const chunk = programmes.slice(i, i + this.CHUNK_SIZE);
-            const chunkNumber = Math.floor(i / this.CHUNK_SIZE) + 1;
-            
-            console.log(`Processamento chunk ${chunkNumber}/${totalChunks}...`);
             
             for (const programme of chunk) {
                 const channelId = programme.$.channel;
@@ -93,115 +116,67 @@ class EPGManager {
                     this.programGuide.set(channelId, []);
                 }
 
+                const start = this.parseEPGDate(programme.$.start);
+                const stop = this.parseEPGDate(programme.$.stop);
+
+                if (!start || !stop) continue;
+
                 const programData = {
-                    start: new Date(programme.$.start),
-                    stop: new Date(programme.$.stop),
-                    title: programme.title?.[0]?.$?.text || programme.title?.[0] || 'Nessun titolo',
-                    description: programme.desc?.[0]?.$?.text || programme.desc?.[0] || '',
-                    category: programme.category?.[0]?.$?.text || programme.category?.[0] || ''
+                    start,
+                    stop,
+                    title: programme.title?.[0]?._ || programme.title?.[0]?.$?.text || programme.title?.[0] || 'Nessun titolo',
+                    description: programme.desc?.[0]?._ || programme.desc?.[0]?.$?.text || programme.desc?.[0] || '',
+                    category: programme.category?.[0]?._ || programme.category?.[0]?.$?.text || programme.category?.[0] || ''
                 };
 
                 this.programGuide.get(channelId).push(programData);
             }
-
-            // Attendi prima del prossimo chunk
-            await new Promise(resolve => setTimeout(resolve, this.CHUNK_DELAY));
-            console.log(`Completato chunk ${chunkNumber}/${totalChunks}`);
         }
 
-        // Ordina i programmi per ogni canale
         for (const [channelId, programs] of this.programGuide.entries()) {
-            this.programGuide.set(
-                channelId, 
-                programs.sort((a, b) => a.start - b.start)
-            );
+            this.programGuide.set(channelId, programs.sort((a, b) => a.start - b.start));
         }
-
-        console.log('Primi 5 canali con EPG:', Array.from(this.programGuide.keys()).slice(0, 5));
 
         this.lastUpdate = Date.now();
-        this.isUpdating = false;
-        console.log('Aggiornamento EPG completato con successo');
     }
 
     getCurrentProgram(channelId) {
-        console.log('[EPG] Ricerca programma corrente per ID:', channelId);
+        const programs = this.programGuide.get(channelId);
+        if (!programs?.length) return null;
+
+        const now = new Date();
+        const currentProgram = programs.find(program => program.start <= now && program.stop >= now);
         
-        // Converti l'ID in formati diversi per la ricerca
-        const possibleIds = [
-            channelId,
-            channelId.replace(/\(.*\)/, ''), // Rimuovi parte tra parentesi
-            channelId.toLowerCase()
-        ];
-
-        for (const [storedId, programs] of this.programGuide.entries()) {
-            console.log(`[EPG] Confronto con ID memorizzato: ${storedId}`);
-            
-            const matchingIds = possibleIds.filter(id => 
-                storedId.toLowerCase().includes(id.toLowerCase())
-            );
-
-            if (matchingIds.length > 0) {
-                const now = new Date();
-                const nowUTC = new Date(now.toISOString()); // Converti in UTC
-                const programs = this.programGuide.get(storedId);
-                
-                if (programs && programs.length > 0) {
-                    const currentProgram = programs.find(program => 
-                        program.start <= nowUTC && program.stop >= nowUTC
-                    );
-
-                    if (currentProgram) {
-                        console.log('[EPG] Programma corrente trovato:', currentProgram);
-                        return currentProgram;
-                    }
-                }
-            }
+        if (currentProgram) {
+            return {
+                ...currentProgram,
+                start: this.formatDateIT(currentProgram.start),
+                stop: this.formatDateIT(currentProgram.stop)
+            };
         }
-
-        console.log('[EPG] Nessun programma corrente trovato per:', channelId);
+        
         return null;
     }
 
-    getUpcomingPrograms(channelId, limit = 5) {
-        console.log('[EPG] Ricerca programmi futuri per ID:', channelId);
+    getUpcomingPrograms(channelId) {
+        const programs = this.programGuide.get(channelId);
+        if (!programs?.length) return [];
+
+        const now = new Date();
         
-        // Converti l'ID in formati diversi per la ricerca
-        const possibleIds = [
-            channelId,
-            channelId.replace(/\(.*\)/, ''), // Rimuovi parte tra parentesi
-            channelId.toLowerCase()
-        ];
-
-        for (const [storedId, programs] of this.programGuide.entries()) {
-            console.log(`[EPG] Confronto con ID memorizzato: ${storedId}`);
-            
-            const matchingIds = possibleIds.filter(id => 
-                storedId.toLowerCase().includes(id.toLowerCase())
-            );
-
-            if (matchingIds.length > 0 && programs && programs.length > 0) {
-                const now = new Date();
-                const upcomingPrograms = programs
-                    .filter(program => program.start >= now)
-                    .slice(0, limit);
-
-                if (upcomingPrograms.length > 0) {
-                    console.log('[EPG] Programmi futuri trovati:', upcomingPrograms);
-                    return upcomingPrograms;
-                }
-            }
-        }
-
-        console.log('[EPG] Nessun programma futuro trovato per:', channelId);
-        return [];
+        return programs
+            .filter(program => program.start >= now)
+            .slice(0, 2)
+            .map(program => ({
+                ...program,
+                start: this.formatDateIT(program.start),
+                stop: this.formatDateIT(program.stop)
+            }));
     }
 
     needsUpdate() {
         if (!this.lastUpdate) return true;
-        // Controlla se sono passate più di 24 ore dall'ultimo aggiornamento
-        const hoursSinceUpdate = (Date.now() - this.lastUpdate) / (1000 * 60 * 60);
-        return hoursSinceUpdate >= 24;
+        return (Date.now() - this.lastUpdate) >= (24 * 60 * 60 * 1000);
     }
 
     isEPGAvailable() {
@@ -211,9 +186,11 @@ class EPGManager {
     getStatus() {
         return {
             isUpdating: this.isUpdating,
-            lastUpdate: this.lastUpdate ? new Date(this.lastUpdate).toLocaleString() : 'Mai',
+            lastUpdate: this.lastUpdate ? this.formatDateIT(new Date(this.lastUpdate)) : 'Mai',
             channelsCount: this.programGuide.size,
-            programsCount: Array.from(this.programGuide.values()).reduce((acc, progs) => acc + progs.length, 0)
+            programsCount: Array.from(this.programGuide.values())
+                          .reduce((acc, progs) => acc + progs.length, 0),
+            timezone: this.timeZoneOffset
         };
     }
 }
