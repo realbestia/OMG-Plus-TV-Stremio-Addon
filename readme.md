@@ -45,7 +45,16 @@ Un add-on per Stremio che carica una playlist di canali M3U con supporto EPG e v
 - Attiva/disattiva le funzionalità EPG
 - Valori: `yes` per attivare, qualsiasi altro valore per disattivare
 - Default: disattivato
-- **Nota**: Si sconsiglia l'attivazione su piani gratuiti di hosting per limiti di risorse
+- Durante il caricamente epg potresti notare dei rallentamenti, la durata del processo mediamente è di 5 minuti se rispetti le dimensioni su indicate.
+- L'epg viene caricata all'installazione del server e ogni notte alle ore 3:00
+- **Nota**: Si consiglia l'attivazione su piani gratuiti di hosting solo per file epg non superiori a 5 MB.
+  
+#### EPG_URL
+- **Opzionale**
+- Normalmente l'epg è ricavato dalla playlist M3U
+- Puoi però impostarla manualmente con questa variabile d'ambiente
+- Puoi usare sia un url compresso che direttamente xml
+- **Nota**: l'epg viene mostrata solo se l'id del canale è lo stesso definito nella playlist M3U
 
 #### PROXY_URL e PROXY_PASSWORD
 - **Opzionali**
@@ -53,10 +62,18 @@ Un add-on per Stremio che carica una playlist di canali M3U con supporto EPG e v
 - Necessari per la compatibilità con Android e Web
 - Default: nessun proxy
 
+#### FORCE_PROXY
+- Se la tua playlist ha bisogno necessariamente di un proxy pui disattivare i link diretti impostando su "yes" questa variabile d'ambiente
+
 #### PORT
 - **Opzionale**
 - Porta del server
 - Default: 10000
+
+#### TIMEZONE_OFFSET
+- I dati degli orari dei programmi vengono mostrati con riferimento standard all'orario CET.
+- Di base il sistema imposta l'offset per l'orario italiano
+- Per impostare il tuo fuso orario imposta l'offset nel formato "+1:00". NB per l'Italia non serve impostare nulla.
 
 ### Intervalli di Cache
 ```javascript
@@ -91,9 +108,6 @@ epgSettings: {
 ### Deploy su Render.com
 1. Collega il repository a Render
 2. Configura le variabili d'ambiente:
-   - `M3U_URL` (opzionale)
-   - `PROXY_URL` e `PROXY_PASSWORD` (opzionale)
-   - `ENABLE_EPG` (sconsigliato su piano gratuito)
 3. Deploy automatico ad ogni push
 
 ## Struttura del Progetto
