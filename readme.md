@@ -169,10 +169,15 @@ v1.5.0
 - 📡 L'EPG potrebbe non funzionare correttamente su alcuni hosting gratuiti
 - 📱 Alcuni stream potrebbero richiedere il proxy per funzionare su dispositivi mobili
 - 💾 La cache EPG potrebbe occupare molta memoria con molti canali
+- ⚠️ Render.com ha un timer che manda in standby il server se non utilizzato, rallentando poi il riavvio; utilizza [uptime](https://uptimerobot.com/) per risolvere il problema
 
 ## ⚖️ Esclusione di responsabilità
-- Non sono responsabile dell'uso fraudolento di questo addon
+- Non sono responsabile di un eventuale uso illecito di questo addon
 - Non fornisco garanzie sulla sicurezza del funzionamento
+
+## 👏 Ringraziamenti
+- Grazie a FuriousCat per l'idea del nome OMG
+- Grazie a tutto il team di https://www.reddit.com/r/Stremio_Italia/ per il supporto, i suggerimenti e le guide di questo addon disponibili anche sul canale telegram https://t.me/Stremio_ITA
 
 ## 📄 Licenza
 Questo progetto è rilasciato sotto licenza MIT. Vedi il file `LICENSE` per i dettagli.
