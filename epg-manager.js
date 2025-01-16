@@ -130,11 +130,40 @@ class EPGManager {
     getCurrentProgram(channelId) {
         console.log('[EPG] Ricerca programma corrente per ID:', channelId);
         
-        // Verifica se abbiamo programmi per questo ID esatto
+        // Cerca corrispondenze simili per debug
+        const similarMatches = [];
+        const searchTerm = channelId.toLowerCase();
+        
+        for (const [id, programs] of this.programGuide.entries()) {
+            // Verifica diverse possibili somiglianze
+            const idLower = id.toLowerCase();
+            const similarity = {
+                id: id,
+                matchType: null,
+                sample: programs[0]?.title  // Mostra un esempio di programma
+            };
+
+            if (idLower.includes(searchTerm) || searchTerm.includes(idLower)) {
+                similarity.matchType = 'partial';
+                similarMatches.push(similarity);
+            } else if (idLower.replace(/[^a-z0-9]/g, '') === searchTerm.replace(/[^a-z0-9]/g, '')) {
+                similarity.matchType = 'normalized';
+                similarMatches.push(similarity);
+            }
+        }
+
+        // Logga le corrispondenze simili trovate
+        if (similarMatches.length > 0) {
+            console.log('[EPG] Trovate corrispondenze simili:', 
+                similarMatches.map(m => `\n- ID: "${m.id}" (${m.matchType}) - Esempio programma: ${m.sample}`).join('')
+            );
+        }
+
+        // Usa solo corrispondenza esatta per i dati effettivi
         const programs = this.programGuide.get(channelId);
         
         if (!programs) {
-            console.log('[EPG] Nessun programma trovato per ID:', channelId);
+            console.log('[EPG] Nessun programma trovato per ID esatto:', channelId);
             return null;
         }
 
