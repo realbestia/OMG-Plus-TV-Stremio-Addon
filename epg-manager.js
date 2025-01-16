@@ -116,26 +116,53 @@ class EPGManager {
                 console.log('Titolo:', p.title?.[0]?._ || p.title?.[0]);
                 console.log('-----------------');
             });
-        } else {
-            console.log('\nNessun programma RAI trovato nell\'EPG');
         }
-        console.log('========================================\n');
+
+        // Counter per tenere traccia dei programmi processati
+        const processedPrograms = new Map();
 
         for (let i = 0; i < programmes.length; i += this.CHUNK_SIZE) {
             const chunk = programmes.slice(i, i + this.CHUNK_SIZE);
             const chunkNumber = Math.floor(i / this.CHUNK_SIZE) + 1;
             
-            console.log(`Processamento chunk ${chunkNumber}/${totalChunks}...`);
-            
             for (const programme of chunk) {
                 const channelId = programme.$.channel;
+
+                // Inizializza contatori
+                if (!processedPrograms.has(channelId)) {
+                    processedPrograms.set(channelId, {
+                        total: 0,
+                        valid: 0,
+                        skipped: 0
+                    });
+                }
+                const counter = processedPrograms.get(channelId);
+                counter.total++;
+
                 if (!this.programGuide.has(channelId)) {
                     this.programGuide.set(channelId, []);
                 }
 
+                const start = this.parseEPGDate(programme.$.start);
+                const stop = this.parseEPGDate(programme.$.stop);
+
+                // Debug per date non valide
+                if (!start || !stop || isNaN(start) || isNaN(stop)) {
+                    counter.skipped++;
+                    if (channelId.toLowerCase().includes('rai')) {
+                        console.log(`[Debug] Date non valide per ${channelId}:`, {
+                            start: programme.$.start,
+                            parsed_start: start,
+                            stop: programme.$.stop,
+                            parsed_stop: stop
+                        });
+                    }
+                    continue;
+                }
+
                 const programData = {
-                    start: this.parseEPGDate(programme.$.start),
-                    stop: this.parseEPGDate(programme.$.stop),
+                    start,
+                    stop,
                     title: programme.title?.[0]?._
                            || programme.title?.[0]?.$?.text 
                            || programme.title?.[0] 
@@ -150,14 +177,10 @@ class EPGManager {
                              || ''
                 };
 
-                // Verifica che le date siano valide prima di aggiungere il programma
-                if (programData.start && programData.stop && !isNaN(programData.start) && !isNaN(programData.stop)) {
-                    this.programGuide.get(channelId).push(programData);
-                }
+                this.programGuide.get(channelId).push(programData);
+                counter.valid++;
             }
 
-            // Attendi prima del prossimo chunk
-            await new Promise(resolve => setTimeout(resolve, this.CHUNK_DELAY));
             console.log(`Completato chunk ${chunkNumber}/${totalChunks}`);
         }
 
@@ -172,12 +195,16 @@ class EPGManager {
         // Log riepilogativo
         console.log('\n=== Riepilogo Canali EPG ===');
         console.log('Totale canali trovati:', this.programGuide.size);
-        console.log('Canali RAI trovati:');
-        Array.from(this.programGuide.keys())
-            .filter(k => k.toLowerCase().includes('rai'))
-            .forEach(k => {
-                console.log(`- ${k}: ${this.programGuide.get(k).length} programmi`);
-            });
+        console.log('\nDettaglio canali RAI:');
+        for (const [channelId, stats] of processedPrograms.entries()) {
+            if (channelId.toLowerCase().includes('rai')) {
+                console.log(`\nCanale: ${channelId}`);
+                console.log(`- Programmi totali processati: ${stats.total}`);
+                console.log(`- Programmi validi salvati: ${stats.valid}`);
+                console.log(`- Programmi saltati: ${stats.skipped}`);
+                console.log(`- Programmi nella guida: ${this.programGuide.get(channelId)?.length || 0}`);
+            }
+        }
         console.log('===========================\n');
 
         this.lastUpdate = Date.now();
