@@ -97,14 +97,29 @@ class EPGManager {
                 }
 
                 const programData = {
-                    start: new Date(programme.$.start),
-                    stop: new Date(programme.$.stop),
-                    title: programme.title?.[0]?.$?.text || programme.title?.[0] || 'Nessun titolo',
-                    description: programme.desc?.[0]?.$?.text || programme.desc?.[0] || '',
-                    category: programme.category?.[0]?.$?.text || programme.category?.[0] || ''
+                    start: programme.$.start ? new Date(programme.$.start) : null,
+                    stop: programme.$.stop ? new Date(programme.$.stop) : null,
+                    title: programme.title?.[0]?._
+                           || programme.title?.[0]?.$?.text 
+                           || programme.title?.[0] 
+                           || 'Nessun titolo',
+                    description: programme.desc?.[0]?._
+                                || programme.desc?.[0]?.$?.text 
+                                || programme.desc?.[0] 
+                                || '',
+                    category: programme.category?.[0]?._ 
+                             || programme.category?.[0]?.$?.text 
+                             || programme.category?.[0] 
+                             || ''
                 };
 
-                this.programGuide.get(channelId).push(programData);
+                // Verifica che le date siano valide prima di aggiungere il programma
+                if (programData.start && programData.stop && !isNaN(programData.start) && !isNaN(programData.stop)) {
+                    this.programGuide.get(channelId).push(programData);
+                } else {
+                    console.log(`[EPG] Ignorato programma con date non valide per ${channelId}:`, 
+                        JSON.stringify(programme.$, null, 2));
+                }
             }
 
             // Attendi prima del prossimo chunk
@@ -129,58 +144,26 @@ class EPGManager {
     getCurrentProgram(channelId) {
         console.log('[EPG] Ricerca programma corrente per ID:', channelId);
         
-        // Cerca corrispondenze simili per debug
-        const similarMatches = [];
-        const searchTerm = channelId.toLowerCase();
-        
-        for (const [id, programs] of this.programGuide.entries()) {
-            // Verifica diverse possibili somiglianze
-            const idLower = id.toLowerCase();
-            const similarity = {
-                id: id,
-                matchType: null,
-                programCount: programs.length,
-                sample: programs[0] ? {
-                    title: programs[0].title,
-                    start: programs[0].start,
-                    stop: programs[0].stop
-                } : 'Nessun programma'
-            };
-
-            if (idLower.includes(searchTerm) || searchTerm.includes(idLower)) {
-                similarity.matchType = 'partial';
-                similarMatches.push(similarity);
-            } else if (idLower.replace(/[^a-z0-9]/g, '') === searchTerm.replace(/[^a-z0-9]/g, '')) {
-                similarity.matchType = 'normalized';
-                similarMatches.push(similarity);
-            }
-        }
-
-        // Logga le corrispondenze simili trovate
-        if (similarMatches.length > 0) {
-            console.log('[EPG] Trovate corrispondenze simili:', 
-                similarMatches.map(m => 
-                    `\n- ID: "${m.id}" (${m.matchType})`
-                    + `\n  Programmi totali: ${m.programCount}`
-                    + `\n  Esempio: ${typeof m.sample === 'string' ? m.sample : JSON.stringify(m.sample)}`
-                ).join('')
-            );
-        }
-
         // Debug info sulla ricerca esatta
         const programs = this.programGuide.get(channelId);
-        console.log(`[EPG] Dati per match esatto "${channelId}":`,
+        console.log(`[EPG] Dati per ID "${channelId}":`,
             programs ? `${programs.length} programmi trovati` : 'Nessun programma');
         
         if (!programs || programs.length === 0) {
-            console.log('[EPG] Nessun programma trovato per ID esatto:', channelId);
+            console.log('[EPG] Nessun programma trovato per ID:', channelId);
             return null;
         }
 
         // Trova il programma corrente
         const now = new Date();
         const nowUTC = new Date(now.toISOString());
-        const currentProgram = programs.find(program => 
+        const validPrograms = programs.filter(p => 
+            p.start && p.stop && !isNaN(p.start) && !isNaN(p.stop)
+        );
+        
+        console.log(`[EPG] Programmi validi per ${channelId}: ${validPrograms.length}/${programs.length}`);
+        
+        const currentProgram = validPrograms.find(program => 
             program.start <= nowUTC && program.stop >= nowUTC
         );
 
@@ -190,7 +173,7 @@ class EPGManager {
         }
 
         console.log('[EPG] Nessun programma corrente per ID:', channelId, 
-            '(Primo programma disponibile:', JSON.stringify(programs[0], null, 2), ')');
+            '(Primo programma disponibile:', JSON.stringify(validPrograms[0] || null, null, 2), ')');
         return null;
     }
 
@@ -199,7 +182,7 @@ class EPGManager {
         
         // Debug info sulla ricerca esatta
         const programs = this.programGuide.get(channelId);
-        console.log(`[EPG] Dati per match esatto "${channelId}":`,
+        console.log(`[EPG] Dati per ID "${channelId}":`,
             programs ? `${programs.length} programmi trovati` : 'Nessun programma');
         
         if (!programs || programs.length === 0) {
@@ -209,7 +192,13 @@ class EPGManager {
 
         // Filtra i programmi futuri
         const now = new Date();
-        const upcomingPrograms = programs
+        const validPrograms = programs.filter(p => 
+            p.start && p.stop && !isNaN(p.start) && !isNaN(p.stop)
+        );
+        
+        console.log(`[EPG] Programmi validi per ${channelId}: ${validPrograms.length}/${programs.length}`);
+        
+        const upcomingPrograms = validPrograms
             .filter(program => program.start >= now)
             .slice(0, limit);
 
