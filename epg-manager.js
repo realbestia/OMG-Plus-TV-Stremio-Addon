@@ -37,7 +37,7 @@ class EPGManager {
             hour: '2-digit',
             minute: '2-digit',
             hour12: false
-        }).replace(/\./g, ':');  // Fix per alcuni sistemi che usano il punto
+        }).replace(/\./g, ':');
     }
 
     parseEPGDate(dateString) {
@@ -73,8 +73,8 @@ class EPGManager {
         try {
             this.isUpdating = true;
             const response = await axios.get(url, { responseType: 'arraybuffer' });
-            
             let xmlString;
+
             try {
                 const decompressed = await gunzip(response.data);
                 xmlString = decompressed.toString();
@@ -87,7 +87,7 @@ class EPGManager {
             await this.processEPGInChunks(xmlData);
             
         } catch (error) {
-            console.error('Errore aggiornamento EPG:', error.message);
+            console.error('Errore EPG:', error.message);
         } finally {
             this.isUpdating = false;
         }
@@ -124,12 +124,8 @@ class EPGManager {
             }
         }
 
-        // Ordina i programmi per data
         for (const [channelId, programs] of this.programGuide.entries()) {
-            this.programGuide.set(
-                channelId, 
-                programs.sort((a, b) => a.start - b.start)
-            );
+            this.programGuide.set(channelId, programs.sort((a, b) => a.start - b.start));
         }
 
         this.lastUpdate = Date.now();
@@ -158,13 +154,10 @@ class EPGManager {
         if (!programs?.length) return [];
 
         const now = new Date();
-        const threeHoursFromNow = new Date(now.getTime() + (3 * 60 * 60 * 1000));
-
+        
         return programs
-            .filter(program => 
-                program.start >= now && 
-                program.start <= threeHoursFromNow
-            )
+            .filter(program => program.start >= now)
+            .slice(0, 2)
             .map(program => ({
                 ...program,
                 start: this.formatDateIT(program.start),
@@ -174,8 +167,7 @@ class EPGManager {
 
     needsUpdate() {
         if (!this.lastUpdate) return true;
-        const hoursSinceUpdate = (Date.now() - this.lastUpdate) / (1000 * 60 * 60);
-        return hoursSinceUpdate >= 24;
+        return (Date.now() - this.lastUpdate) >= (24 * 60 * 60 * 1000);
     }
 
     isEPGAvailable() {
@@ -185,9 +177,7 @@ class EPGManager {
     getStatus() {
         return {
             isUpdating: this.isUpdating,
-            lastUpdate: this.lastUpdate ? 
-                       this.formatDateIT(new Date(this.lastUpdate)) : 
-                       'Mai',
+            lastUpdate: this.lastUpdate ? this.formatDateIT(new Date(this.lastUpdate)) : 'Mai',
             channelsCount: this.programGuide.size,
             programsCount: Array.from(this.programGuide.values())
                           .reduce((acc, progs) => acc + progs.length, 0),
