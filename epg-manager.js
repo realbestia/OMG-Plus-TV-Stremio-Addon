@@ -16,7 +16,7 @@ class EPGManager {
     }
 
     async initializeEPG(url) {
-        console.log('Inizializzazione EPG pianificata...');
+        console.log('Inizializzazione EPG...');
         
         // Pianifica l'aggiornamento alle 3 del mattino
         cron.schedule('0 3 * * *', () => {
@@ -24,10 +24,13 @@ class EPGManager {
             this.startEPGUpdate(url);
         });
 
-        // Avvia il primo aggiornamento dopo 1 minuto dall'avvio
-        setTimeout(() => {
-            this.startEPGUpdate(url);
-        }, 60 * 1000);
+        // Esegui immediatamente il primo aggiornamento solo se non ci sono dati
+        if (!this.programGuide.size) {
+            console.log('Primo caricamento EPG...');
+            await this.startEPGUpdate(url);
+        } else {
+            console.log('EPG già caricato, skip primo caricamento');
+        }
     }
 
     async startEPGUpdate(url) {
@@ -127,73 +130,53 @@ class EPGManager {
     getCurrentProgram(channelId) {
         console.log('[EPG] Ricerca programma corrente per ID:', channelId);
         
-        // Converti l'ID in formati diversi per la ricerca
-        const possibleIds = [
-            channelId,
-            channelId.replace(/\(.*\)/, ''), // Rimuovi parte tra parentesi
-            channelId.toLowerCase()
-        ];
-
-        for (const [storedId, programs] of this.programGuide.entries()) {
-            console.log(`[EPG] Confronto con ID memorizzato: ${storedId}`);
-            
-            const matchingIds = possibleIds.filter(id => 
-                storedId.toLowerCase().includes(id.toLowerCase())
-            );
-
-            if (matchingIds.length > 0) {
-                const now = new Date();
-                const nowUTC = new Date(now.toISOString()); // Converti in UTC
-                const programs = this.programGuide.get(storedId);
-                
-                if (programs && programs.length > 0) {
-                    const currentProgram = programs.find(program => 
-                        program.start <= nowUTC && program.stop >= nowUTC
-                    );
-
-                    if (currentProgram) {
-                        console.log('[EPG] Programma corrente trovato:', currentProgram);
-                        return currentProgram;
-                    }
-                }
-            }
+        // Verifica se abbiamo programmi per questo ID esatto
+        const programs = this.programGuide.get(channelId);
+        
+        if (!programs) {
+            console.log('[EPG] Nessun programma trovato per ID:', channelId);
+            return null;
         }
 
-        console.log('[EPG] Nessun programma corrente trovato per:', channelId);
+        // Trova il programma corrente
+        const now = new Date();
+        const nowUTC = new Date(now.toISOString());
+        const currentProgram = programs.find(program => 
+            program.start <= nowUTC && program.stop >= nowUTC
+        );
+
+        if (currentProgram) {
+            console.log('[EPG] Programma corrente trovato:', currentProgram);
+            return currentProgram;
+        }
+
+        console.log('[EPG] Nessun programma corrente per ID:', channelId);
         return null;
     }
 
     getUpcomingPrograms(channelId, limit = 5) {
         console.log('[EPG] Ricerca programmi futuri per ID:', channelId);
         
-        // Converti l'ID in formati diversi per la ricerca
-        const possibleIds = [
-            channelId,
-            channelId.replace(/\(.*\)/, ''), // Rimuovi parte tra parentesi
-            channelId.toLowerCase()
-        ];
-
-        for (const [storedId, programs] of this.programGuide.entries()) {
-            console.log(`[EPG] Confronto con ID memorizzato: ${storedId}`);
-            
-            const matchingIds = possibleIds.filter(id => 
-                storedId.toLowerCase().includes(id.toLowerCase())
-            );
-
-            if (matchingIds.length > 0 && programs && programs.length > 0) {
-                const now = new Date();
-                const upcomingPrograms = programs
-                    .filter(program => program.start >= now)
-                    .slice(0, limit);
-
-                if (upcomingPrograms.length > 0) {
-                    console.log('[EPG] Programmi futuri trovati:', upcomingPrograms);
-                    return upcomingPrograms;
-                }
-            }
+        // Verifica se abbiamo programmi per questo ID esatto
+        const programs = this.programGuide.get(channelId);
+        
+        if (!programs) {
+            console.log('[EPG] Nessun programma trovato per ID:', channelId);
+            return [];
         }
 
-        console.log('[EPG] Nessun programma futuro trovato per:', channelId);
+        // Filtra i programmi futuri
+        const now = new Date();
+        const upcomingPrograms = programs
+            .filter(program => program.start >= now)
+            .slice(0, limit);
+
+        if (upcomingPrograms.length > 0) {
+            console.log('[EPG] Programmi futuri trovati:', upcomingPrograms);
+            return upcomingPrograms;
+        }
+
+        console.log('[EPG] Nessun programma futuro per ID:', channelId);
         return [];
     }
 
