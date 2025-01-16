@@ -1,128 +1,4 @@
-getCurrentProgram(channelId) {
-        console.log('[EPG] Ricerca programma corrente per ID:', channelId);
-        
-        // Cerca corrispondenze simili per debug
-        const similarMatches = [];
-        const searchTerm = channelId.toLowerCase();
-        
-        console.log('[EPG] Canali disponibili:', Array.from(this.programGuide.keys())
-            .filter(k => k.toLowerCase().includes('rai'))  // Filtra solo per debug
-            .join(', '));
-        
-        for (const [id, programs] of this.programGuide.entries()) {
-            // Verifica diverse possibili somiglianze
-            const idLower = id.toLowerCase();
-            const similarity = {
-                id: id,
-                matchType: null,
-                programCount: programs.length,
-                sample: programs[0] ? {
-                    title: programs[0].title,
-                    start: programs[0].start,
-                    stop: programs[0].stop
-                } : 'Nessun programma'
-            };
-
-            if (idLower.includes(searchTerm) || searchTerm.includes(idLower)) {
-                similarity.matchType = 'partial';
-                similarMatches.push(similarity);
-            } else if (idLower === searchTerm) {  // Match case-insensitive esatto
-                similarity.matchType = 'exact-case-insensitive';
-                similarMatches.push(similarity);
-            }
-        }
-
-        // Logga le corrispondenze simili trovate
-        if (similarMatches.length > 0) {
-            console.log('[EPG] Trovate corrispondenze simili:', 
-                similarMatches.map(m => 
-                    `\n- ID: "${m.id}" (${m.matchType})`
-                    + `\n  Programmi totali: ${m.programCount}`
-                    + `\n  Esempio: ${typeof m.sample === 'string' ? m.sample : JSON.stringify(m.sample)}`
-                ).join('')
-            );
-        }
-
-        // Cerca prima con case esatto poi con case insensitive
-        let programs = this.programGuide.get(channelId);
-        if (!programs) {
-            // Prova una ricerca case-insensitive
-            const lowerChannelId = channelId.toLowerCase();
-            const foundKey = Array.from(this.programGuide.keys())
-                .find(key => key.toLowerCase() === lowerChannelId);
-            if (foundKey) {
-                programs = this.programGuide.get(foundKey);
-                console.log(`[EPG] Trovato match case-insensitive: ${foundKey}`);
-            }
-        }
-
-        if (!programs || programs.length === 0) {
-            console.log('[EPG] Nessun programma trovato per ID:', channelId);
-            return null;
-        }
-
-        // Trova il programma corrente
-        const now = new Date();
-        const nowUTC = new Date(now.toISOString());
-        const validPrograms = programs.filter(p => 
-            p.start && p.stop && !isNaN(p.start) && !isNaN(p.stop)
-        );
-        
-        console.log(`[EPG] Programmi validi per ${channelId}: ${validPrograms.length}/${programs.length}`);
-        
-        const currentProgram = validPrograms.find(program => 
-            program.start <= nowUTC && program.stop >= nowUTC
-        );
-
-        if (currentProgram) {
-            console.log('[EPG] Programma corrente trovato:', JSON.stringify(currentProgram, null, 2));
-            return currentProgram;
-        }
-
-        console.log('[EPG] Nessun programma corrente per ID:', channelId, 
-            '(Primo programma disponibile:', JSON.stringify(programs[0], null, 2), ')');
-        return null;toLowerCase();
-        
-        console.log('[EPG] Canali disponibili:', Array.from(this.programGuide.keys())
-            .filter(k => k.toLowerCase().includes('rai'))  // Filtra solo per debug
-            .join(', '));
-        
-        for (const [id, programs] of this.programGuide.entries()) {
-            // Verifica diverse possibili somiglianze
-            const idLower = id.toLowerCase();
-            const similarity = {
-                id: id,
-                matchType: null,
-                programCount: programs.length,
-                sample: programs[0] ? {
-                    title: programs[0].title,
-                    start: programs[0].start,
-                    stop: programs[0].stop
-                } : 'Nessun programma'
-            };
-
-            if (idLower.includes(searchTerm) || searchTerm.includes(idLower)) {
-                similarity.matchType = 'partial';
-                similarMatches.push(similarity);
-            } else if (idLower === searchTerm) {  // Match case-insensitive esatto
-                similarity.matchType = 'exact-case-insensitive';
-                similarMatches.push(similarity);
-            }
-        }
-
-        // Logga le corrispondenze simili trovate
-        if (similarMatches.length > 0) {
-            console.log('[EPG] Trovate corrispondenze simili:', 
-                similarMatches.map(m => 
-                    `\n- ID: "${m.id}" (${m.matchType})`
-                    + `\n  Programmi totali: ${m.programCount}`
-                    + `\n  Esempio: ${typeof m.sample === 'string' ? m.sample : JSON.stringify(m.sample)}`
-                ).join('')
-            );
-        }
-
-        // Cerca prima con case esatto poi con case insensitive
-        let programs = this.programGuconst axios = require('axios');
+const axios = require('axios');
 const { parseStringPromise } = require('xml2js');
 const zlib = require('zlib');
 const { promisify } = require('util');
@@ -227,84 +103,23 @@ class EPGManager {
         const programmes = data.tv.programme;
         const totalChunks = Math.ceil(programmes.length / this.CHUNK_SIZE);
         
-        // Creiamo una mappa case-insensitive
-        const caseInsensitiveGuide = new Map();
-        console.log(`\nInizio processamento EPG: ${programmes.length} programmi totali`);
-        console.log(`Formato programmi EPG (primi 3):`);
-        programmes.slice(0, 3).forEach(p => {
-            console.log('Channel:', p.$.channel, 'Title:', JSON.stringify(p.title));
-        });
-
-        for (let i = 0; i < programmes.length; i += this.CHUNK_SIZE) {
-            const chunk = programmes.slice(i, i + this.CHUNK_SIZE);
-            const chunkNumber = Math.floor(i / this.CHUNK_SIZE) + 1;
-            
-            console.log(`\nProcessamento chunk ${chunkNumber}/${totalChunks}...`);
-            
-            for (const programme of chunk) {
-                const channelId = programme.$.channel.toLowerCase(); // Converti in minuscolo
-                if (!caseInsensitiveGuide.has(channelId)) {
-                    caseInsensitiveGuide.set(channelId, {
-                        originalId: programme.$.channel,
-                        programs: []
-                    });
-                }
-
-                const programData = {
-                    start: this.parseEPGDate(programme.$.start),
-                    stop: this.parseEPGDate(programme.$.stop),
-                    title: programme.title?.[0]?._
-                           || programme.title?.[0]?.$?.text 
-                           || programme.title?.[0] 
-                           || 'Nessun titolo',
-                    description: programme.desc?.[0]?._
-                                || programme.desc?.[0]?.$?.text 
-                                || programme.desc?.[0] 
-                                || '',
-                    category: programme.category?.[0]?._ 
-                             || programme.category?.[0]?.$?.text 
-                             || programme.category?.[0] 
-                             || ''
-                };
-
-                // Verifica che le date siano valide prima di aggiungere il programma
-                if (programData.start && programData.stop && !isNaN(programData.start) && !isNaN(programData.stop)) {
-                    caseInsensitiveGuide.get(channelId).programs.push(programData);
-                }
-            }
+        console.log(`\n=== Inizio processamento EPG: ${programmes.length} programmi totali ===`);
+        
+        // Log dei primi programmi RAI per debug
+        const raiPrograms = programmes.filter(p => p.$.channel.toLowerCase().includes('rai')).slice(0, 3);
+        if (raiPrograms.length > 0) {
+            console.log('\nEsempio programmi RAI trovati nell\'EPG:');
+            raiPrograms.forEach(p => {
+                console.log(`\nCanale: ${p.$.channel}`);
+                console.log('Start:', p.$.start);
+                console.log('Stop:', p.$.stop);
+                console.log('Titolo:', p.title?.[0]?._ || p.title?.[0]);
+                console.log('-----------------');
+            });
+        } else {
+            console.log('\nNessun programma RAI trovato nell\'EPG');
         }
-
-        // Converti la mappa case-insensitive in programGuide
-        this.programGuide.clear();
-        for (const [lowerId, data] of caseInsensitiveGuide.entries()) {
-            this.programGuide.set(data.originalId, 
-                data.programs.sort((a, b) => a.start - b.start)
-            );
-        }
-
-        // Log riepilogativo
-        console.log('\n=== Riepilogo Canali EPG ===');
-        console.log('Totale canali trovati:', this.programGuide.size);
-        console.log('Primi 10 canali con conteggio programmi:');
-        let count = 0;
-        for (const [channel, programs] of this.programGuide.entries()) {
-            if (count++ < 10) {
-                console.log(`- ${channel}: ${programs.length} programmi`);
-            }
-        }
-        console.log('===========================\n');
-
-        this.lastUpdate = Date.now();
-        this.isUpdating = false;
-        console.log('Aggiornamento EPG completato con successo'); chunks di ${this.CHUNK_SIZE} programmi`);
-
-        // Log dei primi programmi per debug
-        console.log('=== Debug primi 2 programmi dall\'EPG ===');
-        console.log(JSON.stringify(programmes.slice(0, 2), null, 2));
-        console.log('=====================================');
-
-        // Traccia canali e conteggi
-        const channelCounts = new Map();
+        console.log('========================================\n');
 
         for (let i = 0; i < programmes.length; i += this.CHUNK_SIZE) {
             const chunk = programmes.slice(i, i + this.CHUNK_SIZE);
@@ -316,7 +131,6 @@ class EPGManager {
                 const channelId = programme.$.channel;
                 if (!this.programGuide.has(channelId)) {
                     this.programGuide.set(channelId, []);
-                    channelCounts.set(channelId, 0);
                 }
 
                 const programData = {
@@ -339,7 +153,6 @@ class EPGManager {
                 // Verifica che le date siano valide prima di aggiungere il programma
                 if (programData.start && programData.stop && !isNaN(programData.start) && !isNaN(programData.stop)) {
                     this.programGuide.get(channelId).push(programData);
-                    channelCounts.set(channelId, channelCounts.get(channelId) + 1);
                 }
             }
 
@@ -358,11 +171,13 @@ class EPGManager {
 
         // Log riepilogativo
         console.log('\n=== Riepilogo Canali EPG ===');
-        console.log('Totale canali trovati:', channelCounts.size);
-        console.log('Dettaglio programmi per canale:');
-        for (const [channel, count] of channelCounts.entries()) {
-            console.log(`- ${channel}: ${count} programmi`);
-        }
+        console.log('Totale canali trovati:', this.programGuide.size);
+        console.log('Canali RAI trovati:');
+        Array.from(this.programGuide.keys())
+            .filter(k => k.toLowerCase().includes('rai'))
+            .forEach(k => {
+                console.log(`- ${k}: ${this.programGuide.get(k).length} programmi`);
+            });
         console.log('===========================\n');
 
         this.lastUpdate = Date.now();
@@ -394,8 +209,8 @@ class EPGManager {
             if (idLower.includes(searchTerm) || searchTerm.includes(idLower)) {
                 similarity.matchType = 'partial';
                 similarMatches.push(similarity);
-            } else if (idLower.replace(/[^a-z0-9]/g, '') === searchTerm.replace(/[^a-z0-9]/g, '')) {
-                similarity.matchType = 'normalized';
+            } else if (idLower === searchTerm) {  // Match case-insensitive esatto
+                similarity.matchType = 'exact-case-insensitive';
                 similarMatches.push(similarity);
             }
         }
