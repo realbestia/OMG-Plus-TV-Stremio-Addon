@@ -48,7 +48,7 @@ async function generateConfig() {
             manifest: {
                 id: 'org.mccoy88f.omgplustv',
                 version: '1.5.0',
-                name: 'OMG+ TV Stremio Addon',
+                name: 'OMG+ TV',
                 description: 'Un add-on per Stremio che carica una playlist personalizzata di canali M3U con EPG.',
                 logo: 'https://github.com/mccoy88f/OMG-TV-Stremio-Addon/blob/main/tv.png?raw=true',
                 resources: ['stream', 'catalog', 'meta'],
