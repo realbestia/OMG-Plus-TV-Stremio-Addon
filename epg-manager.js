@@ -69,9 +69,12 @@ class EPGManager {
 
     async startEPGUpdate(url) {
         if (this.isUpdating) return;
+        console.log('\n=== Inizio Aggiornamento EPG ===');
 
         try {
             this.isUpdating = true;
+            console.log('Scaricamento EPG da:', url);
+
             const response = await axios.get(url, { responseType: 'arraybuffer' });
             let xmlString;
 
@@ -85,6 +88,10 @@ class EPGManager {
             const xmlData = await parseStringPromise(xmlString);
             this.programGuide.clear();
             await this.processEPGInChunks(xmlData);
+            const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+            console.log(`\n✓ Aggiornamento EPG completato in ${duration} secondi`);
+            console.log('=== Fine Aggiornamento EPG ===\n');
+
             
         } catch (error) {
             console.error('Errore EPG:', error.message);
