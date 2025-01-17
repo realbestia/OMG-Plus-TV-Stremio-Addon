@@ -107,8 +107,10 @@ epgSettings: {
 
 ### ☁️ Deploy su Render.com
 1. Collega il repository a Render
-2. Configura le variabili d'ambiente
-3. Deploy automatico ad ogni push
+2. Configura le variabili d'ambiente e procedi al deploy oppure
+3. Deploy automatico tramite questo pulsante (è necessario avere account anche gratuito su render.com)
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/mccoy88f/OMG-Plus-TV-Stremio-Addon)
 
 ## 📁 Struttura del Progetto
 
