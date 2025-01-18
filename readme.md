@@ -1,6 +1,7 @@
 # OMG TV % OMG+ TV- Stremio Addon
 
 Un add-on per Stremio per aggiungere al catalogo playlist di canali M3U con EPG.
+PER LA VERSIONE BASE CON CANALI ITALIANI visita questa repository: https://github.com/mccoy88f/OMG-TV-Stremio-Addon
 
 ## 🚀 Novità in questa Versione
 
@@ -13,7 +14,7 @@ Un add-on per Stremio per aggiungere al catalogo playlist di canali M3U con EPG.
 ### Playlist Utilizzata
 - **URL Fisso multiplaylist**: `https://github.com/mccoy88f/OMG-TV-Stremio-Addon/tree/link.playlist`
 - **EPG Fisso multiplaylist**: `https://github.com/mccoy88f/OMG-TV-Stremio-Addon/tree/link.epg`
-- **URL & EPG Personalizzata multiplaylist** utilizza la versione plus: `https://github.com/mccoy88f/OMG-TV-Stremio-Addon/tree/plus`
+- **URL & EPG Personalizzata multiplaylist** utilizza la versione plus: `https://github.com/mccoy88f/OMG-Plus-TV-Stremio-Addon`
   
 ## 🌟 Funzionalità 
 
@@ -73,7 +74,7 @@ Un add-on per Stremio per aggiungere al catalogo playlist di canali M3U con EPG.
 2. Configura le variabili d'ambiente opzionali e procedi al deploy oppure
 3. Deploy automatico tramite questo pulsante (è necessario avere account anche gratuito su render.com) - Selezionare la branch su plus per attivare la versione plus
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/mccoy88f/OMG-TV-Stremio-Addon)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/mccoy88f/OMG-Plus-TV-Stremio-Addon)
 
 ## 🔄 Changelog
 
