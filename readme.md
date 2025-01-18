@@ -79,8 +79,8 @@ PER LA VERSIONE BASE CON CANALI ITALIANI visita questa repository: https://githu
 ## 🔄 Changelog
 
 ### v2.0.0
-- 🔒 Playlist aggiornata per la versione base
-- 📃 Modalità multiplaylist - multiepg (solo versione plus): invece di linkare direttamente ad una playlist o ad una epg puoi inserire nelle variabili il link ad un file di testo con più link dentro)
+- 🔒 Playlist aggiornata per la versione base con epg attiva e aggiornata. Manca solo l'epg per i canali Rakuten e Samsung TV
+- 📃 Modalità multiplaylist - multiepg (solo versione plus): invece di linkare direttamente ad una playlist o ad una epg puoi inserire nelle variabili il link ad un file di testo con più link dentro
 - 🚀 Migliorata stabilità e semplicità di configurazione
 
 ## 🤝 Contribuire
