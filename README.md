@@ -6,6 +6,11 @@ FOR THE BASE VERSION WITH ITALIAN CHANNELS, visit this repository: https://githu
 ## LEGGIMI IN ITALIANO QUI 
 https://github.com/mccoy88f/OMG-Plus-TV-Stremio-Addon/blob/main/readme.it.md
 
+IMPORTANT: First of all...
+
+<a href="https://www.buymeacoffee.com/mccoy88f"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a beer&emoji=🍺&slug=mccoy88f&button_colour=FFDD00&font_colour=000000&font_family=Bree&outline_colour=000000&coffee_colour=ffffff" /></a>
+
+
 ## 🚀 What's New in This Version
 
 ### Key Features
@@ -48,6 +53,16 @@ https://github.com/mccoy88f/OMG-Plus-TV-Stremio-Addon/blob/main/readme.it.md
 - Default: enabled  
 - WARNING: EPG with extracted size greater than 5/7 MB may block servers if hosted on Render.com  
 
+#### Timezone Configuration
+The EPG (Electronic Program Guide) data is often provided in UTC. To ensure that the program times are displayed correctly in your local timezone, you can configure the timezone offset using the TIMEZONE_OFFSET environment variable.
+
+Setting the Timezone Offset Format: The TIMEZONE_OFFSET must be in the format ±HH:MM. For example:
+
++1:00 for Central European Time (CET).
+-5:00 for Eastern Standard Time (EST).
+
+Default Value: If the TIMEZONE_OFFSET is not set, the add-on will default to +1:00 (CET).
+
 #### PROXY_URL and PROXY_PASSWORD  
 - MediaFlow Proxy configuration  
 - Optional for Android and Web compatibility  
@@ -79,7 +94,18 @@ https://github.com/mccoy88f/OMG-Plus-TV-Stremio-Addon/blob/main/readme.it.md
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/mccoy88f/OMG-Plus-TV-Stremio-Addon)  
 
+IMPORTANT: If you haven't done so yet...
+
+<a href="https://www.buymeacoffee.com/mccoy88f"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a beer&emoji=🍺&slug=mccoy88f&button_colour=FFDD00&font_colour=000000&font_family=Bree&outline_colour=000000&coffee_colour=ffffff" /></a>
+
+
 ## 🔄 Changelog  
+
+### v2.5.0
+- Improved playlist and epg management, new logo, mutiplaylist and multiepg also from sites like pastebin
+- Improved genre/group management
+- Channels with the same id are managed as one channel but with streams from the various channels
+- Support for larger epg files with longer download timeout
 
 ### v2.0.0  
 - 🔒 Updated playlist for the base version with active and updated EPG. Only missing EPG for Rakuten and Samsung TV channels  
