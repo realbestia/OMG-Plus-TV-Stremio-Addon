@@ -6,6 +6,11 @@ FOR THE BASE VERSION WITH ITALIAN CHANNELS, visit this repository: https://githu
 ## LEGGIMI IN ITALIANO QUI 
 https://github.com/mccoy88f/OMG-Plus-TV-Stremio-Addon/blob/main/readme.it.md
 
+IMPORTANTE: First of all...
+
+<a href="https://www.buymeacoffee.com/mccoy88f"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a beer&emoji=🍺&slug=mccoy88f&button_colour=FFDD00&font_colour=000000&font_family=Bree&outline_colour=000000&coffee_colour=ffffff" /></a>
+
+
 ## 🚀 What's New in This Version
 
 ### Key Features
@@ -88,6 +93,11 @@ Default Value: If the TIMEZONE_OFFSET is not set, the add-on will default to +1:
 3. Automatic deployment via this button (a free Render.com account is required) - Select the plus branch to activate the plus version  
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/mccoy88f/OMG-Plus-TV-Stremio-Addon)  
+
+IMPORTANTE: If you haven't done so yet...
+
+<a href="https://www.buymeacoffee.com/mccoy88f"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a beer&emoji=🍺&slug=mccoy88f&button_colour=FFDD00&font_colour=000000&font_family=Bree&outline_colour=000000&coffee_colour=ffffff" /></a>
+
 
 ## 🔄 Changelog  
 
