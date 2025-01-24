@@ -52,6 +52,7 @@ https://github.com/mccoy88f/OMG-Plus-TV-Stremio-Addon/blob/main/readme.it.md
 The EPG (Electronic Program Guide) data is often provided in UTC. To ensure that the program times are displayed correctly in your local timezone, you can configure the timezone offset using the TIMEZONE_OFFSET environment variable.
 
 Setting the Timezone Offset Format: The TIMEZONE_OFFSET must be in the format ±HH:MM. For example:
+
 +1:00 for Central European Time (CET).
 -5:00 for Eastern Standard Time (EST).
 
