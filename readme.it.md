@@ -80,6 +80,11 @@ IMPORTANTE: Prima di tutto...
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/mccoy88f/OMG-Plus-TV-Stremio-Addon)
 
+IMPORTANTE: Se ancora non l'hai fatto...
+
+<a href="https://www.buymeacoffee.com/mccoy88f"><img src="https://img.buymeacoffee.com/button-api/?text=Offrimi una birra&emoji=🍺&slug=mccoy88f&button_colour=FFDD00&font_colour=000000&font_family=Bree&outline_colour=000000&coffee_colour=ffffff" /></a>
+
+
 ## 🔄 Changelog
 
 ### v2.0.0
