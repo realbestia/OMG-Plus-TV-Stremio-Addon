@@ -78,7 +78,7 @@ class EPGManager {
         try {
             const response = await axios.get(epgUrl.trim(), { 
                 responseType: 'arraybuffer',
-                timeout: 300000,
+                timeout: 150000,
                 headers: {
                     'User-Agent': 'Mozilla/5.0',
                     'Accept-Encoding': 'gzip, deflate, br'
@@ -279,9 +279,10 @@ class EPGManager {
         if (missingEPG.length > 0) {
             console.log('\n=== Canali M3U senza EPG ===');
             console.log(`✓ Totale canali M3U senza EPG: ${missingEPG.length}`);
-            missingEPG.forEach(ch => {
-                console.log(`- ${ch.name} (ID: ${ch.streamInfo?.tvg?.id})`);
-            });
+    //      Disabilita i commenti delle successive 3 righe per leggere i canali senza epg associata
+//            missingEPG.forEach(ch => {
+//                console.log(`- ${ch.name} (ID: ${ch.streamInfo?.tvg?.id})`);
+//            });
             console.log('=============================\n');
         }
     }
