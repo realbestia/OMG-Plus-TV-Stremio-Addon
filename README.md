@@ -113,4 +113,4 @@ https://github.com/mccoy88f/OMG-Plus-TV-Stremio-Addon/blob/main/readme.it.md
 - Thanks to the entire team at https://www.reddit.com/r/Stremio_Italia/ for the support, suggestions, and guides for this addon, also available on the Telegram channel https://t.me/Stremio_ITA  
 
 ## 📜 License  
-Project released under the MIT license.
+Project released under the MIT license. Logo came from Iconic Panda: https://www.flaticon.com/free-icon/tv_18223703
