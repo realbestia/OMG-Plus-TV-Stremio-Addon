@@ -51,7 +51,7 @@ IMPORTANTE: Prima di tutto...
 - ATTENZIONE: epg con dimensione estratta maggiore di 5/7 Mbyte potrebbero bloccare i servere se presenti su Render.com
 
 ### EPG_URL
-- Set a specific EPG url (xml o compressed)
+- Imposta un url EPG specifico (xml o compresso)
 
 #### PROXY_URL e PROXY_PASSWORD
 - Configurazione del MediaFlow Proxy
