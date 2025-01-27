@@ -8,7 +8,7 @@ IMPORTANTE: Prima di tutto...
 <a href="https://www.buymeacoffee.com/mccoy88f"><img src="https://img.buymeacoffee.com/button-api/?text=Offrimi una birra&emoji=🍺&slug=mccoy88f&button_colour=FFDD00&font_colour=000000&font_family=Bree&outline_colour=000000&coffee_colour=ffffff" /></a>
 
 
-## 🚀 Novità in questa Versione
+## 🚀 Novità in questa Versione (vedi in basso)
 
 ### Caratteristiche Principali
 - 🔒 Versione Base: **Playlist Statica**: URL completamente hardcoded
@@ -50,6 +50,9 @@ IMPORTANTE: Prima di tutto...
 - Default: attivo
 - ATTENZIONE: epg con dimensione estratta maggiore di 5/7 Mbyte potrebbero bloccare i servere se presenti su Render.com
 
+### EPG_URL
+- Set a specific EPG url (xml o compressed)
+
 #### PROXY_URL e PROXY_PASSWORD
 - Configurazione del MediaFlow Proxy
 - Opzionali per la compatibilità con Android e Web
@@ -87,6 +90,11 @@ IMPORTANTE: Se ancora non l'hai fatto...
 
 
 ## 🔄 Changelog
+
+### v3.0.0
+- Gestione epg migliorata
+- Gestione di flussi dash mpd non criptati tramite proxy
+- Remapper: file link.epg.remapper sincronizza l'id del canale da m3u con l'id del canale da epg
 
 ### v2.5.0
 - Migliore gestione di playlist ed epg, nuovo logo, mutiplaylist e multiepg anche da siti come pastebin
