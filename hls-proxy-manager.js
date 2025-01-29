@@ -30,8 +30,9 @@ class HlsProxyManager {
         }
     }
 
-    buildProxyUrl(streamUrl, userAgent) {
-        if (!this.config.PROXY_URL || !this.config.PROXY_PASSWORD) {
+    buildProxyUrl(streamUrl, userAgent, referrer = null) {
+        if (!streamUrl || !this.config.PROXY_URL || !this.config.PROXY_PASSWORD) {
+            console.log('Parametri proxy mancanti');
             return null;
         }
 
@@ -44,19 +45,44 @@ class HlsProxyManager {
             params.append('h_User-Agent', userAgent);
         }
 
+        if (referrer) {
+            params.append('h_Referer', referrer);
+        }
+
         return `${this.config.PROXY_URL}/proxy/hls/manifest.m3u8?${params.toString()}`;
     }
 
     async getProxyStreams(channel) {
         const streams = [];
-        const userAgent = channel.headers?.['User-Agent'] || 'HbbTV/1.6.1';
 
+        // Verifica preventiva delle condizioni
         if (!this.config.PROXY_URL || !this.config.PROXY_PASSWORD) {
+            console.log('Proxy non configurato per:', channel.name);
             return streams;
         }
 
         try {
-            const proxyUrl = this.buildProxyUrl(channel.url, userAgent);
+            const userAgent = channel.headers?.['User-Agent'] || 'HbbTV/1.6.1';
+            const referrer = channel.headers?.['Referer'] || null;
+
+            // Costruisci il proxyUrl all'interno di un blocco try
+            let proxyUrl;
+            try {
+                proxyUrl = this.buildProxyUrl(
+                    channel.url, 
+                    userAgent, 
+                    referrer
+                );
+            } catch (urlError) {
+                console.error('Errore costruzione URL proxy:', urlError);
+                return streams;
+            }
+
+            // Verifica esistenza proxyUrl
+            if (!proxyUrl) {
+                console.log('Impossibile generare URL proxy per:', channel.name);
+                return streams;
+            }
 
             const cacheKey = `${channel.name}_${proxyUrl}`;
             const lastCheck = this.lastCheck.get(cacheKey);
@@ -66,9 +92,10 @@ class HlsProxyManager {
                 return [this.proxyCache.get(cacheKey)];
             }
 
+            // Verifica salute proxy
             if (!await this.checkProxyHealth(proxyUrl)) {
                 console.log('Proxy non attivo per:', channel.name);
-                return [];
+                return streams;
             }
 
             const proxyStream = {
@@ -78,7 +105,8 @@ class HlsProxyManager {
                 behaviorHints: {
                     notWebReady: false,
                     bingeGroup: "tv"
-                }
+                },
+                headers: channel.headers // Aggiungi gli headers originali
             };
 
             this.proxyCache.set(cacheKey, proxyStream);
@@ -86,9 +114,8 @@ class HlsProxyManager {
 
             streams.push(proxyStream);
         } catch (error) {
-            console.error('Errore proxy per il canale:', channel.name, error.message);
-            console.error('URL richiesto:', proxyUrl);
-            console.error('User-Agent:', userAgent);
+            console.error('Errore completo proxy per il canale:', channel.name, error);
+            console.error('Dettagli errore:', error.message, error.stack);
         }
 
         return streams;
