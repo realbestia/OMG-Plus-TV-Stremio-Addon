@@ -15,3 +15,5 @@ services:
         sync: false
       - key: PROXY_URL
         sync: false
+      - key: ID_SUFFIX
+        sync: false
