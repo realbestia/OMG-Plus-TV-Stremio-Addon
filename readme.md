@@ -41,7 +41,7 @@ IMPORTANT: First of all...
 ## 🚀 Deployment Options
 
 ### 1. Deploy on Render.com
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/mccoy88f/OMG-TV-Stremio-Addon)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/mccoy88f/OMG-plus-TV-Stremio-Addon)
 
 1. Click the button above (requires a Render account)
 2. Select 'main' branch (use the other ones only for test)
