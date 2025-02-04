@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 # Clone the repository and checkout specified branch
-RUN git clone https://github.com/mccoy88f/OMG-Plus-TV-Stremio-Addon.git . && \
+RUN git clone https://github.com/mccoy88f/OMG-TV-Stremio-Addon.git . && \
     git checkout ${BRANCH}
 
 # Install dependencies
