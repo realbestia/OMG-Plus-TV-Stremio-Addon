@@ -3,7 +3,7 @@ name: Sync Fork
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Esegui ogni ora (al minuto 0)
+    - cron: '0 0 * * *'  # Esegui ogni giorno
   workflow_dispatch: # Permette di avviare manualmente il workflow
 
 jobs:
